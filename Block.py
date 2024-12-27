@@ -12,6 +12,8 @@ class Block:
 
     _group_tags = None
 
+    _color = None
+
     def tag(self):
         return self._tag
 
@@ -25,7 +27,8 @@ class Block:
         
         self._group_tags.append(tag_id)
 
-    def __init__(self):
+    def __init__(self, color="Grey"):
+        self._color=color
         self._group_tags = []
         Block._count += 1
         self._tag = f"block_{Block._count}"
@@ -41,7 +44,7 @@ class Block:
         width = self._width
 
         if self._rendered == True:
-            canvas.move(self._tag, x, y)
+            canvas.moveto(self._tag, x, y)
             return self._el
 
         
@@ -49,7 +52,7 @@ class Block:
 
         self._el = canvas.create_rectangle(
             x, y, x + width, y + height, 
-            outline="", fill="Grey", tags=tags
+            outline="", fill=self._color, tags=tags
         )
 
         self._borders = (
