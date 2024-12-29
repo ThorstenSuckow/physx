@@ -51,8 +51,7 @@ win.title("physx")
 canvas = tkinter.Canvas(win, bg='black')
 canvas.pack()
 
-win.resizable(False, False)
-
+win.resizable(False, False
 
 i1 = IShape([Block("red"), Block("green"), Block("blue"), Block("yellow")], 100, 150)
 i2 = IShape([Block(), Block(), Block(), Block()], 0, 0)
