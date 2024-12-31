@@ -57,7 +57,8 @@ class Particle:
 
         velocity = max(0.005, (dim/10)) * (dt * 10) * self._acceleration
         
-        self._acceleration = max(1, self._acceleration - 0.1)
+
+        self._acceleration = max(1, self._acceleration - (0.1 if self._acceleration > 10 else 0.01))
         
         
         vx, vy = v
