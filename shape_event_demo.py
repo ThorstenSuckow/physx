@@ -1,9 +1,9 @@
 import pyglet as py
 from random import randint
 from Particle import Particle, particle2pyglet
-from Block import Block
-from IShape import IShape, ishape2pyglet
 from pyglet.window import key
+import time
+from ShapeEvent import ShapeEvent
 
 # use translate function to swap coords origin
 # in pyglet, 0/0 coords are at the bottom left of the screen  
@@ -45,46 +45,57 @@ fps_display = get_fps_display(window)
 
 bounds = (0, 0, window.width, window.height)
 batches = [
-    create_particles(bounds, 500, dim=4, order=0),
-    create_particles(bounds, 250, dim=8, order=1),
-    create_particles(bounds, 100, dim=12, order=2)
+    create_particles(bounds, 2000, dim=10, order=0),
 ]
 
-opacity = []
-def update_opacity(dt, batch):
-    i = 0
-    for b in batch:
-        for s in b[2]:
-            if len(opacity) <= i:
-                opacity.append(1)
-            
-            flip = opacity[i]
-            if (s.opacity == 255 and flip > 0) or (s.opacity == 0 and flip < 0):
-                opacity[i] *= -1
         
-            s.opacity += opacity[i]
-            i+=1
-            
-        
+shape_event = None
 def update(dt, group):
+    global shape_event
+
+    event_ns = time_ns = time.time_ns()
+    
+    if shape_event is not None:
+        radius = shape_event.source.radius
+        center_x = shape_event.x
+        center_y = shape_event.y
+        event_ns = shape_event.ns
+
+
     _, particles, particle_shapes = group
     for idx, _ in enumerate(particles, 0):
         p = particles[idx]
+
+        if shape_event is not None:
+            if (p._x-center_x)**2 + (p._y - center_y)**2 < radius**2:
+                p.trigger(shape_event)
+               
         p.update(dt)
         particle_shapes[idx].position = (p._x, p._y, 0)  
+    
+    if time_ns - event_ns > 0:#500_000_000:
+        shape_event = None
 
+event_batch = py.graphics.Batch()
+def show_circle(x, y, circle):
 
-def block(color):
-    return Block(width=25, height=25, color=color, opacity=128)
+    if circle is not None:
+        circle.position = (x, y)
+        return circle
+        
+    circle = py.shapes.Circle(x, y, 30, color=(255, 255, 255), batch=event_batch)
+    circle.opacity = 0
+    return circle
 
-col = c()
-ishape = IShape([block(col), block(col), block(col), block(col)], 600, 400)
+circle = None
+def on_mouse_press(x, y, button, modifiers):
+    global circle, shape_event
+    circle = show_circle(x, y, circle)
+    shape_event = ShapeEvent(x, y, time.time_ns(), source = circle)
+    
+    pass
 
-def on_key_press(symbol, modifiers):
-    if symbol == key.UP:
-        ishape.rotate().update()
-
-window.push_handlers(on_key_press)
+window.push_handlers(on_mouse_press)
 
 @window.event
 def on_draw():
@@ -92,14 +103,12 @@ def on_draw():
     for batch in batches:
         batch[0].draw()
 
-    
+    event_batch.draw()
     fps_display.draw()    
-    ishape2pyglet(ishape)
 
 
 for idx, batch in enumerate(batches, 0):
     py.clock.schedule(update, batch)
 
-py.clock.schedule_interval(update_opacity, 1/15, batches)
 
 py.app.run()
