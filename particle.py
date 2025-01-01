@@ -15,7 +15,7 @@ class Particle:
 
     def trigger(self, event):
         self._triggered_at = self._age
-        self._acceleration = 50
+        self._acceleration = 20
         x = self._x
         y = self._y
         event_x = event.x
