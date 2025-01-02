@@ -149,8 +149,8 @@ position=('f', triangles)
 )
 
 event_batch = pyglet.graphics.Batch()
-def show_circle(x, y, circle):
 
+def show_circle(x, y, circle):
     if circle is not None:
         circle.position = (x, y)
         return circle
